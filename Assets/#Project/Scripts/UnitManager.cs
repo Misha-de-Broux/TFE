@@ -7,6 +7,7 @@ public class UnitManager : MonoBehaviour {
 
     [SerializeField] HexGrid grid;
     [SerializeField] MouvementSystem mouvementSystem;
+    [SerializeField] TurnManager turnManager;
 
     public bool PlayerTurn { get; private set; } = true;
 
@@ -16,7 +17,9 @@ public class UnitManager : MonoBehaviour {
     public void HandleUnitSelected(GameObject unit) {
         if (PlayerTurn) {
             Unit selectedUnit = unit.GetComponent<Unit>();
-            if (!IsTheSameUnitSelected(selectedUnit)) {
+            if (!turnManager.isAvailable(selectedUnit)) {
+                ClearOldSelection();
+            } else if (!IsTheSameUnitSelected(selectedUnit)) {
                 PrepareUnitForMouvement(selectedUnit);
             }
         }
@@ -25,14 +28,14 @@ public class UnitManager : MonoBehaviour {
     public void HandleHexSelected(GameObject hex) {
         if (PlayerTurn && unit != null) {
             Hex selectedHex = hex.GetComponent<Hex>();
-            if(!HandleOutOfRange(selectedHex.HexCoords) && !HandleSectedHexIsUnitHex(selectedHex.HexCoords)) {
+            if (!HandleOutOfRange(selectedHex.HexCoords) && !HandleSectedHexIsUnitHex(selectedHex.HexCoords)) {
                 HandleDestination(selectedHex);
             }
         }
     }
 
     private void HandleDestination(Hex selectedHex) {
-        if(hex == null || hex != selectedHex) {
+        if (hex == null || hex != selectedHex) {
             hex = selectedHex;
             mouvementSystem.ShowPath(selectedHex.HexCoords, grid);
         } else {
@@ -49,7 +52,7 @@ public class UnitManager : MonoBehaviour {
     }
 
     private bool HandleSectedHexIsUnitHex(Vector3Int hexCoords) {
-        if(hexCoords == unit.HexCoord) {
+        if (hexCoords == unit.HexCoord) {
             unit.Desselect();
             ClearOldSelection();
             return true;
@@ -62,7 +65,7 @@ public class UnitManager : MonoBehaviour {
     }
 
     private void PrepareUnitForMouvement(Unit selectedUnit) {
-        if(unit != null) {
+        if (unit != null) {
             ClearOldSelection();
         }
         unit = selectedUnit;

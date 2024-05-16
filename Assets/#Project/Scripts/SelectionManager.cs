@@ -7,7 +7,6 @@ using UnityEngine.Events;
 
 public class SelectionManager : MonoBehaviour {
     [SerializeField] Camera mainCamera;
-    [SerializeField] TurnManager turnManager;
 
     public LayerMask SelectMask;
 
@@ -19,9 +18,6 @@ public class SelectionManager : MonoBehaviour {
     private void Awake() {
         if (mainCamera == null) {
             mainCamera = Camera.main;
-        }
-        if (turnManager == null) {
-            turnManager = gameObject.AddComponent<TurnManager>();
         }
     }
 

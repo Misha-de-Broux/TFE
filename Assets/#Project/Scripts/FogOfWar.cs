@@ -13,7 +13,7 @@ public class FogOfWar : MonoBehaviour {
     void Start() {
         foreach (GameObject playableCharacter in GameObject.FindGameObjectsWithTag("Player")) {
             Unit eye = playableCharacter.GetComponent<Unit>();
-            eye.onEndingStep += () => UpdateFog(eye);
+            eye.onEndingStep += (Unit unit) => UpdateFog(unit);
             AddEye(eye);
         }
     }
@@ -73,8 +73,6 @@ public class FogOfWar : MonoBehaviour {
             foreach (Hex hex in HexesAt(unitFlatPos + direction)) {
                 if (Sees(unit, hex)) {
                     eyes[unit].Add(hex);
-                } else {
-                    Debug.Log(hex.HexCoords);
                 }
             }
         }

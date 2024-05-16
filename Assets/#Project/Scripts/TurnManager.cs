@@ -2,20 +2,39 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class TurnManager : MonoBehaviour
 {
     List<Unit> pcs = new List<Unit>();
-    List<Unit> exhausted = new List<Unit>();
+    List<Unit> exhaustedPcs = new List<Unit>();
     List<AbstarctNpc> npcs = new List<AbstarctNpc>();
+    List<AbstarctNpc> exhaustedNpcs = new List<AbstarctNpc>();
 
+    
     void Start() {
         foreach (GameObject pc in GameObject.FindGameObjectsWithTag("Player")) {
-            pcs.Add(pc.GetComponent<Unit>());
+            Unit unit = pc.GetComponent<Unit>();
+            if (!pcs.Contains(unit)) {
+                pcs.Add(unit);
+                unit.MouvementFinished += Exhaust;
+            }
         }
         foreach (GameObject npc in GameObject.FindGameObjectsWithTag("NPC")) {
-            npcs.Add(npc.GetComponent<AbstarctNpc>());
+            AbstarctNpc anpc = npc.GetComponent<AbstarctNpc>();
+            if (!npcs.Contains(anpc)) {
+                npcs.Add(anpc);
+                anpc.EndTurn += Exhaust;
+            }
         }
+    }
+
+    private void Exhaust(AbstarctNpc npc) {
+        if (npcs.Contains(npc)){
+            npcs.Remove(npc);
+            exhaustedNpcs.Add(npc);
+        }
+        NpcTurn();
     }
 
     public bool isAvailable(Unit unit) {
@@ -25,19 +44,26 @@ public class TurnManager : MonoBehaviour
     private void Exhaust(Unit unit) {
         if (pcs.Contains(unit)) {
             pcs.Remove(unit);
-            exhausted.Add(unit);
+            exhaustedPcs.Add(unit);
         }
         if(pcs.Count == 0) {
-            EndTurn();
-            pcs = exhausted;
-            exhausted = new List<Unit>();
+            npcs.AddRange(exhaustedNpcs);
+            exhaustedNpcs.Clear();
+            NpcTurn();
         }
     }
 
-    private void EndTurn() {
-        foreach (AbstarctNpc npc in npcs)
-        {
-            npc.TakeTurn();
+    private void NpcTurn() {
+        if (npcs.Count == 0) {
+            pcs.AddRange(exhaustedPcs);
+            exhaustedPcs.Clear();
+        } else {
+            if (npcs[0] == null) {
+                npcs.RemoveAt(0);
+                NpcTurn();
+            } else {
+                npcs[0].TakeTurn();
+            }
         }
     }
 }

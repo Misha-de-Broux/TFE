@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,9 +13,9 @@ public abstract class HighLightManager : MonoBehaviour
     [SerializeField] protected float glowPower;
 
     void Awake() {
-        PrepareMaterialDictionaries();
         glowMaterial.SetColor("_HighLightColor", glowColor);
         glowMaterial.SetFloat("_HighlightStrength", glowPower);
+        PrepareMaterialDictionaries();
     }
 
     protected virtual void PrepareMaterialDictionaries() {

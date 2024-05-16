@@ -61,7 +61,7 @@ Material:
     m_Floats:
     - _DynamicGlow: 1
     - _GlowPower: 1
-    - _HighlightStrength: 1
+    - _HighlightStrength: 0
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Saturation: 1
@@ -69,5 +69,5 @@ Material:
     - _Color: {r: 0.7660377, g: 0.21824843, b: 0.21824843, a: 0}
     - _DefaultColor: {r: 1, g: 0.1490565, b: 0.940041, a: 0}
     - _GlowColor: {r: 1, g: 0.33490568, b: 0.7888937, a: 1}
-    - _HighLightColor: {r: 1, g: 0.33490568, b: 0.7888937, a: 1}
+    - _HighLightColor: {r: 0, g: 1, b: 0, a: 1}
   m_BuildTextureStacks: []

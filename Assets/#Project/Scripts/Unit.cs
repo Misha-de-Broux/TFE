@@ -5,13 +5,12 @@ using UnityEngine;
 [SelectionBase]
 [RequireComponent(typeof(HexCoordinates))]
 [RequireComponent(typeof(UnitHighight))]
-public class Unit : MonoBehaviour
-{
+public class Unit : MonoBehaviour {
     public int mouvement = 8, sightDistance = 6;
     public float eyesHeight = 1;
 
-    public event Action onStartingStep = () => { };
-    public event Action onEndingStep = () => { };
+    public event Action<Unit> onStartingStep = delegate { };
+    public event Action<Unit> onEndingStep = delegate { };
 
     private HexCoordinates _hexCoordinates;
     [SerializeField] float MouvementDuration = 1, RotationDuration = 0.3f, MouvementHeight = 1;
@@ -31,6 +30,12 @@ public class Unit : MonoBehaviour
     private void Awake() {
         _hexCoordinates = GetComponent<HexCoordinates>();
         _highlight = GetComponent<UnitHighight>();
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit)) {
+            transform.position = hit.collider.transform.position;
+        } else {
+            Destroy(gameObject);
+        }
     }
 
     internal void Desselect() {
@@ -47,24 +52,27 @@ public class Unit : MonoBehaviour
     }
 
     private IEnumerator RotationCoroutine(Vector3 endPosition) {
-        Quaternion startRotation = transform.rotation;
-        Vector3 direction = new Vector3(endPosition.x, transform.position.y, endPosition.z) - transform.position;
-        Quaternion endRotation = Quaternion.LookRotation(direction, Vector3.up);
-        if(!Mathf.Approximately(Mathf.Abs(Quaternion.Dot(startRotation, endRotation)), 1)) {
-            float timeElapsed = 0;
-            while(timeElapsed < RotationDuration) {
-                timeElapsed += Time.deltaTime;
-                float lerpStep = timeElapsed / RotationDuration;
-                transform.rotation = Quaternion.Lerp(startRotation, endRotation, lerpStep);
-                yield return null;
+        if (transform.position != endPosition) {
+            Quaternion startRotation = transform.rotation;
+            Vector3 direction = new Vector3(endPosition.x, transform.position.y, endPosition.z) - transform.position;
+            Quaternion endRotation = Quaternion.LookRotation(direction, Vector3.up);
+            if (!Mathf.Approximately(Mathf.Abs(Quaternion.Dot(startRotation, endRotation)), 1)) {
+                float timeElapsed = 0;
+                while (timeElapsed < RotationDuration) {
+                    timeElapsed += Time.deltaTime;
+                    float lerpStep = timeElapsed / RotationDuration;
+                    transform.rotation = Quaternion.Lerp(startRotation, endRotation, lerpStep);
+                    yield return null;
+                }
+                transform.rotation = endRotation;
             }
-            transform.rotation = endRotation;
         }
         StartCoroutine(MouvementCoroutine(endPosition));
     }
 
     private IEnumerator MouvementCoroutine(Vector3 endPosition) {
-        onStartingStep();
+        //Debug.Log($"Start at {HexCoord}");
+        onStartingStep(this);
         Vector3 startPosition = transform.position;
         Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
         float timeElapsed = 0;
@@ -76,15 +84,17 @@ public class Unit : MonoBehaviour
             yield return null;
         }
         transform.position = endPosition;
-        onEndingStep();
-        if(_path.Count > 0) {
+        onEndingStep(this);
+        //Debug.Log($"End at {HexCoord}");
+        if (_path.Count > 0) {
             StartCoroutine(RotationCoroutine(_path.Dequeue()));
         } else {
+            Debug.Log($"{this} finished moving");
             MouvementFinished?.Invoke(this);
         }
     }
 
     private float YMouvement(float start, float end, float step) {
-        return (2*end - 2*start - 4*MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
+        return (2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
     }
 }
