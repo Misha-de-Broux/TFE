@@ -14,6 +14,8 @@ public class Unit : MonoBehaviour {
 
     private HexCoordinates _hexCoordinates;
     [SerializeField] float MouvementDuration = 1, RotationDuration = 0.3f, MouvementHeight = 1;
+    private LayerMask _hexMask;
+
 
     private UnitHighight _highlight;
     private Queue<Vector3> _path = new Queue<Vector3>();
@@ -30,12 +32,25 @@ public class Unit : MonoBehaviour {
     private void Awake() {
         _hexCoordinates = GetComponent<HexCoordinates>();
         _highlight = GetComponent<UnitHighight>();
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit)) {
-            transform.position = hit.collider.transform.position;
+        _hexMask = LayerMask.GetMask(new string[] { "HexTile" });
+        Hex position = GetHex();
+        onStartingStep += Free;
+        onEndingStep += Occupy;
+        if (position != null ) {
+            transform.position = position.transform.position;
+            position.isObstacle = true;
         } else {
             Destroy(gameObject);
         }
+    }
+
+    private Hex GetHex() {
+        RaycastHit hit;
+        Hex hex = null;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit,float.MaxValue,_hexMask)) {
+            hex = hit.collider.gameObject.GetComponent<Hex>();
+        }
+        return hex;
     }
 
     internal void Desselect() {
@@ -71,7 +86,6 @@ public class Unit : MonoBehaviour {
     }
 
     private IEnumerator MouvementCoroutine(Vector3 endPosition) {
-        //Debug.Log($"Start at {HexCoord}");
         onStartingStep(this);
         Vector3 startPosition = transform.position;
         Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
@@ -85,7 +99,6 @@ public class Unit : MonoBehaviour {
         }
         transform.position = endPosition;
         onEndingStep(this);
-        //Debug.Log($"End at {HexCoord}");
         if (_path.Count > 0) {
             StartCoroutine(RotationCoroutine(_path.Dequeue()));
         } else {
@@ -96,5 +109,12 @@ public class Unit : MonoBehaviour {
 
     private float YMouvement(float start, float end, float step) {
         return (2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
+    }
+
+    private void Occupy(Unit unit) {
+        unit.GetHex().isObstacle = true;
+    }
+    private void Free(Unit unit) {
+        unit.GetHex().isObstacle = false;
     }
 }
