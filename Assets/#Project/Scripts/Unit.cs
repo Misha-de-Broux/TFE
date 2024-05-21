@@ -108,13 +108,15 @@ public class Unit : MonoBehaviour {
     }
 
     private float YMouvement(float start, float end, float step) {
-        return (2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
+        return start == end ? start :(2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
     }
 
     private void Occupy(Unit unit) {
-        unit.GetHex().isObstacle = true;
+        //unit.GetHex().isObstacle = true;
+        unit.GetHex().isWalkable = false;
     }
     private void Free(Unit unit) {
-        unit.GetHex().isObstacle = false;
+        //unit.GetHex().isObstacle = false;
+        unit.GetHex().isWalkable = true;
     }
 }
