@@ -24,7 +24,7 @@ public class GraphSearch {
                         if (!costSoFar.Keys.Contains(neighbour) || newCost < costSoFar[neighbour]) {
                             costSoFar[neighbour] = newCost;
                             visitedNodes[neighbour] = currentNode;
-                            if (!nodesToVisitQueue.Contains(neighbour)) {
+                            if (!nodesToVisitQueue.Contains(neighbour) && !grid[neighbour].isObstacle) {
                                 nodesToVisitQueue.Enqueue(neighbour);
                             }
                         }
