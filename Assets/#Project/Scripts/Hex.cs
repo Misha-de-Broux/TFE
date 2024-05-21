@@ -8,7 +8,7 @@ using UnityEngine;
 public class Hex : MonoBehaviour {
     HexHighlight highlight;
     private HexCoordinates hexCoordinates;
-    [SerializeField]public  bool isObstacle = false;
+    [SerializeField]public  bool isObstacle = false, isWalkable = true;
     [SerializeField] int _cost = 2;
 
     private CapsuleCollider seenCollider;
