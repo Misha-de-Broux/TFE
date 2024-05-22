@@ -13,7 +13,7 @@ public class Hex : MonoBehaviour {
 
     private CapsuleCollider seenCollider;
     public int Cost { get { return _cost; } }
-    private int _seenBy = 0;
+    public int _seenBy = 0;
     [SerializeField] private Hex _covered;
     private Boolean _discovered = false;
 

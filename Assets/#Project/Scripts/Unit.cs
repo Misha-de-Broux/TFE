@@ -15,6 +15,7 @@ public class Unit : MonoBehaviour {
     private HexCoordinates _hexCoordinates;
     [SerializeField] float MouvementDuration = 1, RotationDuration = 0.3f, MouvementHeight = 1;
     private LayerMask _hexMask;
+    public List<Hex> hexesSeen = new List<Hex>();
 
 
     private UnitHighight _highlight;

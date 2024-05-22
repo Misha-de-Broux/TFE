@@ -5,7 +5,7 @@ using UnityEngine;
 public class FogOfWar : MonoBehaviour {
 
     private Dictionary<Vector2Int, List<Hex>> flatMap = new Dictionary<Vector2Int, List<Hex>>();
-    private Dictionary<Unit, List<Hex>> eyes = new Dictionary<Unit, List<Hex>>();
+    private List<Unit> eyes = new List<Unit>();
 
     [SerializeField] LayerMask fogMask = new LayerMask();
 
@@ -13,7 +13,6 @@ public class FogOfWar : MonoBehaviour {
     void Start() {
         foreach (GameObject playableCharacter in GameObject.FindGameObjectsWithTag("Player")) {
             Unit eye = playableCharacter.GetComponent<Unit>();
-            eye.onEndingStep += (Unit unit) => UpdateFog(unit);
             AddEye(eye);
         }
     }
@@ -24,30 +23,41 @@ public class FogOfWar : MonoBehaviour {
             flatMap[flatCoord] = new List<Hex>();
         }
         flatMap[flatCoord].Add(hex);
-        foreach (Unit unit in eyes.Keys) {
+        foreach (Unit unit in eyes) {
             if (Sees(unit, hex)) {
                 hex.See();
-                eyes[unit].Add(hex);
+                unit.hexesSeen.Add(hex);
             }
+        }
+    }
+
+    public void UpdateFogOfwar() {
+        foreach(Unit unit in eyes) {
+            UpdateFog(unit);
         }
     }
 
     public void RemoveHex(Hex hex) {
         Vector2Int flatCoord = new Vector2Int(hex.HexCoords.x, hex.HexCoords.z);
         flatMap[flatCoord].Remove(hex);
-        foreach (Unit unit in eyes.Keys) {
-            if (eyes[unit].Remove(hex)) {
+        foreach (Unit unit in eyes) {
+            if (unit.hexesSeen.Remove(hex)) {
                 hex.UnSee();
             }
         }
     }
 
     public void AddEye(Unit eye) {
-        List<Hex> seenHexes = new List<Hex>();
-        eyes[eye] = seenHexes;
+        eyes.Add(eye);
+        eye.onEndingStep += (Unit unit) => UpdateFog(unit);
+        UpdateFog(eye);
     }
 
     public void RemoveEye(Unit eye) {
+        foreach(Hex hex in eye.hexesSeen) {
+            hex.UnSee();
+        }
+        eye.onEndingStep -= (Unit unit) => UpdateFog(unit);
         eyes.Remove(eye);
     }
 
@@ -64,20 +74,24 @@ public class FogOfWar : MonoBehaviour {
     }
 
     private void UpdateFog(Unit unit) {
-        foreach (Hex hex in eyes[unit]) {
+        foreach (Hex hex in unit.hexesSeen) {
             hex.UnSee();
         }
-        eyes[unit].Clear();
+        UpdateSeen(unit);
+        foreach (Hex hex in unit.hexesSeen) {
+            hex.See();
+        }
+    }
+
+    private void UpdateSeen(Unit unit) {
+        unit.hexesSeen.Clear();
         Vector2Int unitFlatPos = new Vector2Int(unit.HexCoord.x, unit.HexCoord.z);
         foreach (Vector2Int direction in CloserThan(unit.sightDistance)) {
             foreach (Hex hex in HexesAt(unitFlatPos + direction)) {
                 if (Sees(unit, hex)) {
-                    eyes[unit].Add(hex);
+                    unit.hexesSeen.Add(hex);
                 }
             }
-        }
-        foreach (Hex hex in eyes[unit]) {
-            hex.See();
         }
     }
 
@@ -109,6 +123,7 @@ public class FogOfWar : MonoBehaviour {
         }
 
     }
+
 
 
 }
