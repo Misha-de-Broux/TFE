@@ -93,6 +93,7 @@ public class FogOfWar : MonoBehaviour {
                 }
             }
         }
+        unit.captain.UpdateOrderRange();
     }
 
     private bool Sees(Unit unit, Hex hex) {

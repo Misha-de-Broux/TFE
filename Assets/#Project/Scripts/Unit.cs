@@ -19,7 +19,6 @@ public class Unit : MonoBehaviour {
     public Unit captain;
     public List<Unit> pawns = new List<Unit>();
     public List<Hex> orderRange = new List<Hex>();
-    bool orderUptoDate = false;
 
 
     private UnitHighight _highlight;
@@ -96,7 +95,6 @@ public class Unit : MonoBehaviour {
     }
 
     private IEnumerator MouvementCoroutine(Vector3 endPosition) {
-        captain.orderUptoDate = false;
         onStartingStep(this);
         Vector3 startPosition = transform.position;
         Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
@@ -118,8 +116,7 @@ public class Unit : MonoBehaviour {
     }
 
     public void UpdateOrderRange() {
-        if (captain == this && !orderUptoDate) {
-            orderUptoDate = true;
+        if (captain == this) {
             List<Hex> newOrderRange = new List<Hex>();
             newOrderRange.AddRange(hexesSeen);
             List<Unit> toCheck = new List<Unit>();
@@ -163,7 +160,6 @@ public class Unit : MonoBehaviour {
     }
 
     public bool IsActionable() {
-        captain.UpdateOrderRange();
         return captain.orderRange.Contains(GetHex());
     }
 }
