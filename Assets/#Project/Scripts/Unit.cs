@@ -81,6 +81,7 @@ public class Unit : MonoBehaviour {
             Quaternion startRotation = transform.rotation;
             Vector3 direction = new Vector3(endPosition.x, transform.position.y, endPosition.z) - transform.position;
             Quaternion endRotation = Quaternion.LookRotation(direction, Vector3.up);
+            if (GetHex().Hidden) { transform.rotation = endRotation; }
             if (!Mathf.Approximately(Mathf.Abs(Quaternion.Dot(startRotation, endRotation)), 1)) {
                 float timeElapsed = 0;
                 while (timeElapsed < RotationDuration) {
@@ -97,15 +98,17 @@ public class Unit : MonoBehaviour {
 
     private IEnumerator MouvementCoroutine(Vector3 endPosition) {
         onStartingStep(this);
-        Vector3 startPosition = transform.position;
-        Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
-        float timeElapsed = 0;
-        while (timeElapsed < MouvementDuration) {
-            timeElapsed += Time.deltaTime;
-            float lerpStep = timeElapsed / MouvementDuration;
-            transform.position = Vector3.Lerp(startPosition, target, lerpStep);
-            transform.position = new Vector3(transform.position.x, YMouvement(startPosition.y, endPosition.y, lerpStep), transform.position.z);
-            yield return null;
+        if (!GetHex().Hidden) {
+            Vector3 startPosition = transform.position;
+            Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
+            float timeElapsed = 0;
+            while (timeElapsed < MouvementDuration) {
+                timeElapsed += Time.deltaTime;
+                float lerpStep = timeElapsed / MouvementDuration;
+                transform.position = Vector3.Lerp(startPosition, target, lerpStep);
+                transform.position = new Vector3(transform.position.x, YMouvement(startPosition.y, endPosition.y, lerpStep), transform.position.z);
+                yield return null;
+            }
         }
         transform.position = endPosition;
         onEndingStep(this);
@@ -164,7 +167,7 @@ public class Unit : MonoBehaviour {
     }
 
     private void Hide(bool hidden) {
-        foreach (Renderer renderer in GetComponentsInChildren<Renderer>()) { 
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>()) {
             renderer.enabled = !hidden;
         }
     }
