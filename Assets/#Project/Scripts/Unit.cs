@@ -16,6 +16,10 @@ public class Unit : MonoBehaviour {
     [SerializeField] float MouvementDuration = 1, RotationDuration = 0.3f, MouvementHeight = 1;
     private LayerMask _hexMask;
     public List<Hex> hexesSeen = new List<Hex>();
+    public Unit captain;
+    public List<Unit> pawns = new List<Unit>();
+    public List<Hex> orderRange = new List<Hex>();
+    bool orderUptoDate = false;
 
 
     private UnitHighight _highlight;
@@ -34,10 +38,15 @@ public class Unit : MonoBehaviour {
         _hexCoordinates = GetComponent<HexCoordinates>();
         _highlight = GetComponent<UnitHighight>();
         _hexMask = LayerMask.GetMask(new string[] { "HexTile" });
+        if (captain == null) {
+            captain = this;
+        } else {
+            captain.pawns.Add(this);
+        }
         Hex position = GetHex();
         onStartingStep += Free;
         onEndingStep += Occupy;
-        if (position != null ) {
+        if (position != null) {
             transform.position = position.transform.position;
             position.isObstacle = true;
         } else {
@@ -48,7 +57,7 @@ public class Unit : MonoBehaviour {
     private Hex GetHex() {
         RaycastHit hit;
         Hex hex = null;
-        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit,float.MaxValue,_hexMask)) {
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, float.MaxValue, _hexMask)) {
             hex = hit.collider.gameObject.GetComponent<Hex>();
         }
         return hex;
@@ -87,6 +96,7 @@ public class Unit : MonoBehaviour {
     }
 
     private IEnumerator MouvementCoroutine(Vector3 endPosition) {
+        captain.orderUptoDate = false;
         onStartingStep(this);
         Vector3 startPosition = transform.position;
         Vector3 target = new Vector3(endPosition.x, startPosition.y, endPosition.z);
@@ -103,13 +113,44 @@ public class Unit : MonoBehaviour {
         if (_path.Count > 0) {
             StartCoroutine(RotationCoroutine(_path.Dequeue()));
         } else {
-            Debug.Log($"{this} finished moving");
             MouvementFinished?.Invoke(this);
         }
     }
 
+    public void UpdateOrderRange() {
+        if (captain == this && !orderUptoDate) {
+            orderUptoDate = true;
+            List<Hex> newOrderRange = new List<Hex>();
+            newOrderRange.AddRange(hexesSeen);
+            List<Unit> toCheck = new List<Unit>();
+            toCheck.AddRange(pawns);
+            bool updated = true;
+            while (updated) {
+                updated = false;
+                List<Unit> update = new List<Unit>();
+                foreach (Unit unit in toCheck) {
+                    foreach (Hex hexToCheck in unit.hexesSeen) {
+                        if (newOrderRange.Contains(hexToCheck)) {
+                            update.Add(unit);
+                            updated = true;
+                            foreach (Hex hex in unit.hexesSeen) {
+                                if (!newOrderRange.Contains(hex)) {
+                                    newOrderRange.Add(hex);
+                                }
+                            }
+                        }
+                    }
+                }
+                foreach (Unit unit in update) {
+                    toCheck.Remove(unit);
+                }
+            }
+            orderRange = newOrderRange;
+        }
+    }
+
     private float YMouvement(float start, float end, float step) {
-        return start == end ? start :(2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
+        return start == end ? start : (2 * end - 2 * start - 4 * MouvementHeight) * Mathf.Pow(step, 2) + (start - end + 4) * step + start;
     }
 
     private void Occupy(Unit unit) {
@@ -119,5 +160,10 @@ public class Unit : MonoBehaviour {
     private void Free(Unit unit) {
         //unit.GetHex().isObstacle = false;
         unit.GetHex().isWalkable = true;
+    }
+
+    public bool IsActionable() {
+        captain.UpdateOrderRange();
+        return captain.orderRange.Contains(GetHex());
     }
 }

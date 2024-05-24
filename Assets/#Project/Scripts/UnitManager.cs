@@ -83,7 +83,7 @@ public class UnitManager : MonoBehaviour {
 
     private void ClearOldSelection() {
         hex = null;
-        unit.Desselect();
+        unit?.Desselect();
         mouvementSystem.HideRange(grid);
         unit = null;
     }

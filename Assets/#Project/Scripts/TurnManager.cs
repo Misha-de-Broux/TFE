@@ -8,8 +8,10 @@ public class TurnManager : MonoBehaviour
 {
     List<Unit> pcs = new List<Unit>();
     List<Unit> exhaustedPcs = new List<Unit>();
+    List<Unit> strandedPCs = new List<Unit>();
     List<AbstarctNpc> npcs = new List<AbstarctNpc>();
     List<AbstarctNpc> exhaustedNpcs = new List<AbstarctNpc>();
+    
 
     
     void Start() {
@@ -46,7 +48,24 @@ public class TurnManager : MonoBehaviour
             pcs.Remove(unit);
             exhaustedPcs.Add(unit);
         }
-        if(pcs.Count == 0) {
+        foreach(Unit pc in pcs) {
+            if (!pc.IsActionable()) {
+                strandedPCs.Add(pc);
+            }
+        }
+        List<Unit> newStranded = new List<Unit>();
+        foreach(Unit stranded in strandedPCs) {
+            if (stranded.IsActionable()) {
+                pcs.Add(stranded);
+            } else {
+                if (pcs.Contains(stranded)) {
+                    pcs.Remove(stranded);
+                }
+                newStranded.Add(stranded);
+            }
+        }
+        strandedPCs = newStranded;
+        if (pcs.Count == 0) {
             npcs.AddRange(exhaustedNpcs);
             exhaustedNpcs.Clear();
             NpcTurn();
@@ -55,7 +74,13 @@ public class TurnManager : MonoBehaviour
 
     private void NpcTurn() {
         if (npcs.Count == 0) {
-            pcs.AddRange(exhaustedPcs);
+            foreach(Unit unit in exhaustedPcs) {
+                if (unit.IsActionable()) {
+                    pcs.Add(unit);
+                } else {
+                    strandedPCs.Add(unit);
+                }
+            }
             exhaustedPcs.Clear();
         } else {
             if (npcs[0] == null) {
