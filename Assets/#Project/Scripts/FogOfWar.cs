@@ -49,7 +49,7 @@ public class FogOfWar : MonoBehaviour {
 
     public void AddEye(Unit eye) {
         eyes.Add(eye);
-        eye.onEndingStep += (Unit unit) => UpdateFog(unit);
+        eye.onEndingStep += UpdateFog;
         UpdateFog(eye);
     }
 
@@ -57,7 +57,7 @@ public class FogOfWar : MonoBehaviour {
         foreach(Hex hex in eye.hexesSeen) {
             hex.UnSee();
         }
-        eye.onEndingStep -= (Unit unit) => UpdateFog(unit);
+        eye.onEndingStep -= UpdateFog;
         eyes.Remove(eye);
     }
 
@@ -97,7 +97,9 @@ public class FogOfWar : MonoBehaviour {
     }
 
     private bool Sees(Unit unit, Hex hex) {
-        if (Mathf.Abs((unit.HexCoord.x - hex.HexCoords.x) + (unit.HexCoord.z - hex.HexCoords.z)) > unit.sightDistance) {
+        if (Mathf.Abs((unit.HexCoord.x - hex.HexCoords.x) + (unit.HexCoord.z - hex.HexCoords.z)) > unit.sightDistance || 
+            Mathf.Abs((unit.HexCoord.x - hex.HexCoords.x))> unit.sightDistance || 
+            Mathf.Abs((unit.HexCoord.z - hex.HexCoords.z)) > unit.sightDistance) {
             return false;
         }
         RaycastHit hit;

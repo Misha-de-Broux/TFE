@@ -16,9 +16,9 @@ public class Hex : MonoBehaviour {
     public int _seenBy = 0;
     [SerializeField] private Hex _covered;
     private Boolean _discovered = false;
-
-    public event Action onCover = () => { };
-    public event Action onReveal = () => { };
+    public event Action onCover, onReveal;
+    public event Action<bool> onHide;
+    public bool Hidden { get; private set; }
 
     public Vector3Int HexCoords => hexCoordinates.HexCoords;
 
@@ -26,12 +26,16 @@ public class Hex : MonoBehaviour {
         hexCoordinates = GetComponent<HexCoordinates>();
         highlight = GetComponent<HexHighlight>();
         seenCollider = GetComponent<CapsuleCollider>();
+        Hidden = true;
         foreach (Renderer renderer in GetComponentsInChildren<MeshRenderer>()) {
             renderer.enabled = false;
         }
     }
     private void Start() {
         RaycastHit hit;
+        if(_seenBy == 0) {
+            onHide?.Invoke(true);
+        }
         if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up,out hit, 1f)) {
             _covered = hit.collider.GetComponent<Hex>();
             _covered.Cover();
@@ -47,11 +51,11 @@ public class Hex : MonoBehaviour {
     }
 
     public void Cover() {
-        onCover();
+        onCover?.Invoke();
     }
 
     public void Reveal() {
-        onReveal();
+        onReveal?.Invoke() ;
     }
 
     internal void ResetHighlight() {
@@ -65,7 +69,8 @@ public class Hex : MonoBehaviour {
     public void See() {
         Discover();
         if(_seenBy == 0) {
-            Hide(false);
+            Hidden = false;
+            Hide(Hidden);
         }
         _seenBy++;
         RaycastHit hit;
@@ -88,7 +93,8 @@ public class Hex : MonoBehaviour {
     public void UnSee() {
         _seenBy--;
         if(_seenBy == 0) {
-            Hide(true);
+            Hidden = true;
+            Hide(Hidden);
         }
         RaycastHit hit;
         if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up, out hit, 1f)) {
@@ -100,6 +106,7 @@ public class Hex : MonoBehaviour {
 
     private void Hide(bool hidden) {
         highlight.Hide(hidden);
+        onHide?.Invoke(hidden);
     }
 
     public float IsVisible(bool isVisible) {

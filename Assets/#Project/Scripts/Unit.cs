@@ -48,6 +48,7 @@ public class Unit : MonoBehaviour {
         if (position != null) {
             transform.position = position.transform.position;
             position.isObstacle = true;
+            Occupy(this);
         } else {
             Destroy(gameObject);
         }
@@ -151,12 +152,21 @@ public class Unit : MonoBehaviour {
     }
 
     private void Occupy(Unit unit) {
-        //unit.GetHex().isObstacle = true;
-        unit.GetHex().isWalkable = false;
+        Hex hex = unit.GetHex();
+        hex.isWalkable = false;
+        hex.onHide += Hide;
+        Hide(hex.Hidden);
     }
     private void Free(Unit unit) {
-        //unit.GetHex().isObstacle = false;
-        unit.GetHex().isWalkable = true;
+        Hex hex = unit.GetHex();
+        hex.isWalkable = true;
+        hex.onHide -= Hide;
+    }
+
+    private void Hide(bool hidden) {
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>()) { 
+            renderer.enabled = !hidden;
+        }
     }
 
     public bool IsActionable() {
