@@ -27,6 +27,7 @@ public class FogOfWar : MonoBehaviour {
             if (Sees(unit, hex)) {
                 hex.See();
                 unit.hexesSeen.Add(hex);
+                unit.captain.UpdateOrderRange();
             }
         }
     }

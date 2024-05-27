@@ -28,7 +28,9 @@ public abstract class HighLightManager : MonoBehaviour
                 Material mat = null;
                 if (!cachedGlowMaterials.TryGetValue(originalMaterial[i].color, out mat)) {
                     mat = new Material(glowMaterial);
-                    mat.SetTexture("_Texture", originalMaterial[i].mainTexture);
+                    if (mat.GetTexturePropertyNames().Length > 0) {
+                        mat.SetTexture("_MainTex", originalMaterial[i].mainTexture);
+                    }
                     mat.SetColor("_Color", originalMaterial[i].color);
                 }
                 newMaterials[i] = mat;

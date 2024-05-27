@@ -66,6 +66,10 @@ public class Hex : MonoBehaviour {
         highlight.HighLightPath();
     }
 
+    internal void HighlightColor(Color color) {
+        highlight.HighLightColor(color);
+    }
+
     public void See() {
         Discover();
         if(_seenBy == 0) {

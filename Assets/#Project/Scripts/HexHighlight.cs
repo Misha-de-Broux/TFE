@@ -20,7 +20,9 @@ public class HexHighlight : HighLightManager
                 Material mat = null;
                 if (!cachedFogMaterials.TryGetValue(originalMaterial[i].color, out mat)) {
                     mat = new Material(fogMaterial);
-                    mat.SetTexture("_Texture", originalMaterial[i].mainTexture);
+                    if (originalMaterial[i].GetTexturePropertyNameIDs().Length > 0) {
+                        mat.SetTexture("_MainTex", originalMaterial[i].mainTexture);
+                    }
                     mat.SetColor("_Color", originalMaterial[i].color);
                 }
                 newMaterials[i] = mat;
@@ -56,6 +58,16 @@ public class HexHighlight : HighLightManager
                     mat.SetColor("_HighLightColor", pathColor);
                     glowMaterial.SetFloat("_HighlightStrength", glowPower*1.5f);
                 }
+            }
+        }
+    }
+
+    internal void HighLightColor(Color color) {
+        SetGlow(true);
+        foreach (Renderer renderer in glowMaterialDict.Keys) {
+            foreach (Material mat in glowMaterialDict[renderer]) {
+                mat.SetColor("_HighLightColor", color);
+                glowMaterial.SetFloat("_HighlightStrength", glowPower);
             }
         }
     }
