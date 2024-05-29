@@ -78,7 +78,7 @@ public class Unit : MonoBehaviour {
             Quaternion startRotation = transform.rotation;
             Vector3 direction = new Vector3(endPosition.x, transform.position.y, endPosition.z) - transform.position;
             Quaternion endRotation = Quaternion.LookRotation(direction, Vector3.up);
-            if (GetHex().Hidden) { transform.rotation = endRotation; }
+            if (GetHex()?.Hidden ?? true) { transform.rotation = endRotation; }
             if (!Mathf.Approximately(Mathf.Abs(Quaternion.Dot(startRotation, endRotation)), 1)) {
                 float timeElapsed = 0;
                 while (timeElapsed < RotationDuration) {

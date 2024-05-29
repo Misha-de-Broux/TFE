@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] InputActionAsset inputActions;
     [SerializeField] float speed = 1;
-    [SerializeField] int maxZoom = 12, minZoom = 6;
+    [SerializeField] int maxZoom = 12, minZoom = 6, currentZoom = 8;
     public Transform target;
     Camera controlledCamera;
     InputAction move;
@@ -24,24 +24,28 @@ public class CameraController : MonoBehaviour
         map.FindAction("Center").performed += Center;
         controlledCamera = GetComponent<Camera>();
         if (target)
-            transform.position = target.position - transform.forward * 15;
+            transform.position = target.position - transform.forward * 2 * currentZoom;
     }
     public void SetTarget(GameObject gameObjectTargetted) {
         target = gameObjectTargetted.transform;
     }
     private void Center(InputAction.CallbackContext ctx) {
         if (target)
-            transform.position = target.position - transform.forward * 15;
+            transform.position = target.position - transform.forward * 2 * currentZoom;
     }
 
     private void Zoom(InputAction.CallbackContext ctx) {
         if (ctx.ReadValue<float>() < 0) {
-            if (controlledCamera.orthographicSize > minZoom) {
-                controlledCamera.orthographicSize--;
+            if (currentZoom > minZoom) {
+                currentZoom--;
+                controlledCamera.orthographicSize = currentZoom;
+                transform.Translate(2*Vector3.forward);
             }
         } else {
-            if (controlledCamera.orthographicSize < maxZoom) {
-                controlledCamera.orthographicSize++;
+            if (currentZoom < maxZoom) {
+                currentZoom++;
+                controlledCamera.orthographicSize = currentZoom;
+                transform.Translate(-2*Vector3.forward);
             }
         }
     }

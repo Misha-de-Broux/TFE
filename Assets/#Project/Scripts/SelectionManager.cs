@@ -38,13 +38,23 @@ public class SelectionManager : MonoBehaviour {
     }
 
     private bool FindObject(Vector3 mousePosition, out GameObject result) {
-        RaycastHit hit;
-        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
-        if (Physics.Raycast(ray, out hit, float.MaxValue, SelectMask)) {
-            result = hit.collider.gameObject;
-            return true;
-        }
+        float minimumDistance = float.MaxValue;
         result = null;
-        return false;
+        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+        foreach(RaycastHit hit in Physics.RaycastAll(ray, float.MaxValue, SelectMask)) {
+            GameObject go = hit.collider.gameObject;
+            Debug.Log(go);
+            if (IsUnit(go))
+            {
+                result = go;
+                return true;
+            }
+            float distance = Vector3.Distance(go.transform.position, hit.point);
+            if (distance<minimumDistance) {
+                minimumDistance = distance;
+                result = go;
+            }
+        }
+        return result != null;
     }
 }

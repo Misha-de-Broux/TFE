@@ -45,7 +45,7 @@ public class HexGrid : MonoBehaviour {
     Dictionary<Vector3Int, Hex> tileGrid = new Dictionary<Vector3Int, Hex>();
     Dictionary<Vector3Int, List<Vector3Int>> neighboursDict = new Dictionary<Vector3Int, List<Vector3Int>>();
 
-    private void Start() {
+    private void Awake() {
         _fogOfWar = GetComponent<FogOfWar>();
         foreach (Hex hex in FindObjectsOfType<Hex>()) {  
             hex.onCover += () => RemoveHex(hex);
@@ -82,12 +82,13 @@ public class HexGrid : MonoBehaviour {
 
     private void RemoveHex(Hex hex) {
         if (tileGrid.Remove(hex.HexCoords)) {
+            neighboursDict = new Dictionary<Vector3Int, List<Vector3Int>>();
             _fogOfWar.RemoveHex(hex);
         }
     }
 
     private void RevealHex(Hex hex) {
-        try{
+        try {
             tileGrid.Add(hex.HexCoords, hex);
             _fogOfWar.AddHex(hex);
         } catch(ArgumentException) { }

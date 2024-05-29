@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 [SelectionBase]
 [RequireComponent(typeof(HexHighlight))]
-[RequireComponent (typeof(HexCoordinates))]
+[RequireComponent(typeof(HexCoordinates))]
 public class Hex : MonoBehaviour {
     HexHighlight highlight;
     private HexCoordinates hexCoordinates;
-    [SerializeField]public  bool isObstacle = false, isWalkable = true;
+    [SerializeField] public bool isObstacle = false, isWalkable = true;
     [SerializeField] int _cost = 2;
 
     private CapsuleCollider seenCollider;
@@ -32,17 +32,17 @@ public class Hex : MonoBehaviour {
         }
     }
     private void Start() {
-        RaycastHit hit;
-        if(_seenBy == 0) {
+        if (_seenBy == 0) {
             onHide?.Invoke(true);
         }
-        if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up,out hit, 1f)) {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up, out hit, 1f)) {
             _covered = hit.collider.GetComponent<Hex>();
-            _covered.Cover();
         }
+        _covered?.Cover();
     }
 
-    public void EnnableHighlight() { 
+    public void EnnableHighlight() {
         highlight.SetGlow(true);
     }
 
@@ -51,11 +51,13 @@ public class Hex : MonoBehaviour {
     }
 
     public void Cover() {
+        GetComponent<MeshCollider>().enabled = false;
         onCover?.Invoke();
     }
 
     public void Reveal() {
-        onReveal?.Invoke() ;
+        GetComponent<MeshCollider>().enabled = true;
+        onReveal?.Invoke();
     }
 
     internal void ResetHighlight() {
@@ -72,21 +74,23 @@ public class Hex : MonoBehaviour {
 
     public void See() {
         Discover();
-        if(_seenBy == 0) {
+        if (_seenBy == 0) {
             Hidden = false;
             Hide(Hidden);
         }
         _seenBy++;
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up, out hit, 1f)) {
-            _covered = hit.collider.GetComponent<Hex>();
-            _covered.Cover();
+        if (_covered == null) {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position - transform.up * 0.25f, -transform.up, out hit, 1f)) {
+                _covered = hit.collider.GetComponent<Hex>();
+                _covered.Cover();
+            }
         }
         _covered?.See();
     }
 
     private void Discover() {
-        if(!_discovered) {
+        if (!_discovered) {
             _discovered = true;
             foreach (Renderer renderer in GetComponentsInChildren<MeshRenderer>()) {
                 renderer.enabled = true;
@@ -96,7 +100,7 @@ public class Hex : MonoBehaviour {
 
     public void UnSee() {
         _seenBy--;
-        if(_seenBy == 0) {
+        if (_seenBy == 0) {
             Hidden = true;
             Hide(Hidden);
         }

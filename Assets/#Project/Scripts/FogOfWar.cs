@@ -10,7 +10,7 @@ public class FogOfWar : MonoBehaviour {
     [SerializeField] LayerMask fogMask = new LayerMask();
 
     // Start is called before the first frame update
-    void Start() {
+    void Awake() {
         foreach (GameObject playableCharacter in GameObject.FindGameObjectsWithTag("Player")) {
             Unit eye = playableCharacter.GetComponent<Unit>();
             AddEye(eye);
