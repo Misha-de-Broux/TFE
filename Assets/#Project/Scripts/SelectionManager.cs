@@ -37,6 +37,10 @@ public class SelectionManager : MonoBehaviour {
         return result.GetComponent<Unit>() != null;
     }
 
+    private bool IsHex(GameObject result) {
+        return result.GetComponent<Hex>() != null; 
+    }
+
     private bool FindObject(Vector3 mousePosition, out GameObject result) {
         float minimumDistance = float.MaxValue;
         result = null;
@@ -49,10 +53,14 @@ public class SelectionManager : MonoBehaviour {
                 result = go;
                 return true;
             }
-            float distance = Vector3.Distance(go.transform.position, hit.point);
-            if (distance<minimumDistance) {
-                minimumDistance = distance;
-                result = go;
+            if (IsHex(go)) {
+                if (go.GetComponent<Hex>().isWalkable) {
+                    float distance = Vector3.Distance(go.transform.position, hit.point);
+                    if (distance < minimumDistance) {
+                        minimumDistance = distance;
+                        result = go;
+                    }
+                }
             }
         }
         return result != null;
