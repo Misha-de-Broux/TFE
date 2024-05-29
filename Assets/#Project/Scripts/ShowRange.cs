@@ -6,20 +6,18 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 
-public class ShowRange : MonoBehaviour
-{
+public class ShowRange : MonoBehaviour {
     public UnityEvent clearSelection;
     public Unit captain;
     [SerializeField] InputActionAsset uiActions;
     [SerializeField] Color rangeColor;
     private List<Hex> highlightedHexes = new List<Hex>();
-    void Start()
-    {
+    void Start() {
         InputActionMap uiMap = uiActions.FindActionMap("UI");
         uiMap.Enable();
         InputAction showRange = uiMap.FindAction("ShowRange");
         showRange.performed += HighLightRange;
-        showRange.canceled +=  ClearHighLightRange;
+        showRange.canceled += ClearHighLightRange;
     }
 
     private void ClearHighLightRange(InputAction.CallbackContext ctx) {
@@ -32,8 +30,10 @@ public class ShowRange : MonoBehaviour
         highlightedHexes.Clear();
         clearSelection?.Invoke();
         foreach (Hex hex in captain.orderRange) {
-            hex.HighlightColor(rangeColor);
-            highlightedHexes.Add(hex);
+            if (hex.isWalkable) {
+                hex.HighlightColor(rangeColor);
+                highlightedHexes.Add(hex);
+            }
         }
     }
 }
