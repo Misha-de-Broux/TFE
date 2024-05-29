@@ -9,9 +9,6 @@ public class Unit : MonoBehaviour {
     public int mouvement = 8, sightDistance = 6;
     public float eyesHeight = 1;
 
-    public event Action<Unit> onStartingStep = delegate { };
-    public event Action<Unit> onEndingStep = delegate { };
-
     private HexCoordinates _hexCoordinates;
     [SerializeField] float MouvementDuration = 1, RotationDuration = 0.3f, MouvementHeight = 1;
     private LayerMask _hexMask;
@@ -24,7 +21,7 @@ public class Unit : MonoBehaviour {
     private UnitHighight _highlight;
     private Queue<Vector3> _path = new Queue<Vector3>();
 
-    public event Action<Unit> MouvementFinished;
+    public event Action<Unit> MouvementFinished, onStartingStep, onEndingStep;
 
     public Vector3Int HexCoord {
         get {
